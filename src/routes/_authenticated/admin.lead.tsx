@@ -1,11 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { UserCheck, CalendarPlus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStaff } from "@/hooks/use-staff";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/lead")({
@@ -24,7 +22,6 @@ function LeadsPage() {
   const qc = useQueryClient();
   const { data: me } = useStaff();
   const isAdmin = me?.roles.includes("admin") ?? false;
-  const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
 
   const { data: leads } = useQuery({
     queryKey: ["leads"],
@@ -50,25 +47,13 @@ function LeadsPage() {
     },
   });
 
-  const { data: notes } = useQuery({
-    queryKey: ["lead_notes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lead_notes")
-        .select("*, profiles(full_name)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const updateLead = useMutation({
     mutationFn: async ({
       id,
       patch,
     }: {
       id: string;
-      patch: { status?: string; internal_note?: string; assigned_to?: string | null };
+      patch: { status?: string; assigned_to?: string | null };
     }) => {
       const { error } = await supabase.from("leads").update(patch).eq("id", id);
       if (error) throw error;
@@ -99,24 +84,6 @@ function LeadsPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Conversione non riuscita"),
   });
 
-  const addNote = useMutation({
-    mutationFn: async ({ leadId, text }: { leadId: string; text: string }) => {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData.user) throw new Error("Utente non autenticato");
-      const { error } = await supabase.from("lead_notes").insert({
-        lead_id: leadId,
-        note: text.trim(),
-        author_id: userData.user.id,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["lead_notes"] });
-      toast.success("Nota aggiunta");
-    },
-    onError: () => toast.error("Salvataggio nota non riuscito"),
-  });
-
   const remove = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("leads").delete().eq("id", id);
@@ -128,8 +95,6 @@ function LeadsPage() {
     },
     onError: () => toast.error("Operazione non consentita"),
   });
-
-  const notesByLead = (leadId: string) => (notes ?? []).filter((n) => n.lead_id === leadId);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -261,76 +226,14 @@ function LeadsPage() {
               </div>
             </div>
 
-            {l.note && (
-              <p className="mt-5 rounded-xl bg-muted p-4 text-sm text-foreground/90">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Richiesta del cliente
-                </span>
-                <span className="mt-1 block">{l.note}</span>
-              </p>
-            )}
-
-            <Textarea
-              defaultValue={l.internal_note ?? ""}
-              placeholder="Nota interna persistente sul lead…"
-              className="mt-5 min-h-20 rounded-xl"
-              onBlur={(e) => {
-                if (e.target.value !== (l.internal_note ?? "")) {
-                  updateLead.mutate({ id: l.id, patch: { internal_note: e.target.value } });
-                }
-              }}
-            />
-
-            <div className="mt-6 border-t border-border pt-5">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Note interne ({notesByLead(l.id).length})
-              </h3>
-              <div className="mt-3 space-y-3">
-                {notesByLead(l.id).map((n) => (
-                  <div key={n.id} className="rounded-xl bg-muted/60 p-3 text-sm">
-                    <p className="text-foreground/90">{n.note}</p>
-                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>
-                        {(n.profiles as { full_name?: string } | null)?.full_name ?? "Staff"}
-                      </span>
-                      <span>·</span>
-                      <span>
-                        {new Date(n.created_at).toLocaleString("it-IT", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 flex items-start gap-2">
-                <Textarea
-                  value={noteDraft[l.id] ?? ""}
-                  onChange={(e) => setNoteDraft((prev) => ({ ...prev, [l.id]: e.target.value }))}
-                  placeholder="Aggiungi una nota interna…"
-                  className="min-h-[72px] flex-1 rounded-xl text-sm"
-                />
-                <Button
-                  variant="quiet"
-                  size="sm"
-                  className="mt-1"
-                  disabled={!noteDraft[l.id]?.trim() || addNote.isPending}
-                  onClick={() => {
-                    const text = noteDraft[l.id]?.trim();
-                    if (!text) return;
-                    addNote.mutate(
-                      { leadId: l.id, text },
-                      {
-                        onSuccess: () => setNoteDraft((prev) => ({ ...prev, [l.id]: "" })),
-                      },
-                    );
-                  }}
-                >
-                  Salva
-                </Button>
-              </div>
-            </div>
+            <p className="mt-5 rounded-xl bg-muted p-4 text-sm text-foreground/90">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Richiesta del cliente
+              </span>
+              <span className="mt-1 block">
+                {l.note || "Nessuna nota lasciata dal cliente in fase di richiesta."}
+              </span>
+            </p>
           </div>
         ))}
         {(leads?.length ?? 0) === 0 && (
