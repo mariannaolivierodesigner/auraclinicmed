@@ -1,7 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { categories } from "@/lib/treatments";
+import { useQuery } from "@tanstack/react-query";
+import { getTreatmentsCatalog } from "@/lib/treatments-catalog.functions";
 
 export function SiteFooter() {
+  const { data } = useQuery({
+    queryKey: ["treatments-catalog"],
+    queryFn: () => getTreatmentsCatalog(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = data?.categories ?? [];
   return (
     <footer className="border-t border-border bg-secondary/60">
       <div className="container-aura py-20">

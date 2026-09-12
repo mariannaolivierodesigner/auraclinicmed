@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, MapPin, Clock, Phone, MessageCircle } from "lucide-react";
 import { z } from "zod";
@@ -10,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { categories } from "@/lib/treatments";
+import { getTreatmentsCatalog } from "@/lib/treatments-catalog.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contatti")({
@@ -44,6 +45,12 @@ const schema = z.object({
 const slots = ["Mattina infrasettimanale", "Pomeriggio infrasettimanale", "Sabato mattina", "Nessuna preferenza"];
 
 function ContactPage() {
+  const { data: catalog } = useQuery({
+    queryKey: ["treatments-catalog"],
+    queryFn: () => getTreatmentsCatalog(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = catalog?.categories ?? [];
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);

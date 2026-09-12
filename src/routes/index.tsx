@@ -4,12 +4,13 @@ import { useRef } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal, CountUp } from "@/components/site/motion-primitives";
-import { categories, treatments } from "@/lib/treatments";
+import { getTreatmentsCatalog } from "@/lib/treatments-catalog.functions";
 import heroImg from "@/assets/hero-clinic.jpg";
 import doctorImg from "@/assets/doctor-portrait.jpg";
 import silkImg from "@/assets/texture-silk.jpg";
 
 export const Route = createFileRoute("/")({
+  loader: () => getTreatmentsCatalog(),
   head: () => ({
     meta: [
       { title: "AURA Clinic — Chirurgia plastica ed estetica a Milano" },
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/")({
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 function Home() {
+  const { categories, treatments } = Route.useLoaderData();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
@@ -158,7 +160,7 @@ function Home() {
                 <Link
                   key={t.slug}
                   to="/trattamenti/$categoria/$slug"
-                  params={{ categoria: t.category, slug: t.slug }}
+                  params={{ categoria: t.category_slug, slug: t.slug }}
                   className="rounded-full border border-border px-4 py-2 text-sm text-muted-foreground transition-all duration-300 hover:border-sage hover:text-foreground"
                 >
                   {t.name}

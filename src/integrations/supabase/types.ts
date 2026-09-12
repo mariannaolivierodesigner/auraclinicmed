@@ -459,6 +459,104 @@ export type Database = {
         }
         Relationships: []
       }
+      treatment_categories: {
+        Row: {
+          blurb: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          blurb?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      treatments: {
+        Row: {
+          anesthesia: string | null
+          category_id: string
+          created_at: string
+          duration: string | null
+          faq: Json
+          id: string
+          is_active: boolean
+          name: string
+          recovery: string | null
+          slug: string
+          sort_order: number
+          steps: Json
+          summary: string | null
+          updated_at: string
+          what: string | null
+          who: string | null
+        }
+        Insert: {
+          anesthesia?: string | null
+          category_id: string
+          created_at?: string
+          duration?: string | null
+          faq?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          recovery?: string | null
+          slug: string
+          sort_order?: number
+          steps?: Json
+          summary?: string | null
+          updated_at?: string
+          what?: string | null
+          who?: string | null
+        }
+        Update: {
+          anesthesia?: string | null
+          category_id?: string
+          created_at?: string
+          duration?: string | null
+          faq?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          recovery?: string | null
+          slug?: string
+          sort_order?: number
+          steps?: Json
+          summary?: string | null
+          updated_at?: string
+          what?: string | null
+          who?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_shifts: {
         Row: {
           created_at: string

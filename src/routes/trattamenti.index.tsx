@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { Reveal } from "@/components/site/motion-primitives";
-import { categories, treatmentsByCategory } from "@/lib/treatments";
+import { getTreatmentsCatalog } from "@/lib/treatments-catalog.functions";
 
 export const Route = createFileRoute("/trattamenti/")({
+  loader: () => getTreatmentsCatalog(),
   head: () => ({
     meta: [
       { title: "Trattamenti — Chirurgia e medicina estetica | AURA Clinic" },
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/trattamenti/")({
 });
 
 function TreatmentsIndex() {
+  const { categories, treatments } = Route.useLoaderData();
+
   return (
     <>
       <PageHero
@@ -40,7 +43,7 @@ function TreatmentsIndex() {
                 <div className="flex flex-wrap items-end justify-between gap-4">
                   <div>
                     <h2 className="display-md">{c.name}</h2>
-                    <p className="lede mt-2 text-base">{c.blurb}</p>
+                    {c.blurb && <p className="lede mt-2 text-base">{c.blurb}</p>}
                   </div>
                   <Link
                     to="/trattamenti/$categoria"
@@ -53,21 +56,23 @@ function TreatmentsIndex() {
               </Reveal>
 
               <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {treatmentsByCategory(c.slug).map((t, i) => (
-                  <Reveal key={t.slug} delay={i * 0.05}>
-                    <Link
-                      to="/trattamenti/$categoria/$slug"
-                      params={{ categoria: c.slug, slug: t.slug }}
-                      className="card-aura card-hover group flex h-full flex-col justify-between p-7"
-                    >
-                      <div>
-                        <h3 className="text-xl font-semibold tracking-[-0.02em]">{t.name}</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">{t.summary}</p>
-                      </div>
-                      <ArrowUpRight className="mt-8 size-4 text-sage transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
-                    </Link>
-                  </Reveal>
-                ))}
+                {treatments
+                  .filter((t) => t.category_slug === c.slug)
+                  .map((t, i) => (
+                    <Reveal key={t.slug} delay={i * 0.05}>
+                      <Link
+                        to="/trattamenti/$categoria/$slug"
+                        params={{ categoria: c.slug, slug: t.slug }}
+                        className="card-aura card-hover group flex h-full flex-col justify-between p-7"
+                      >
+                        <div>
+                          <h3 className="text-xl font-semibold tracking-[-0.02em]">{t.name}</h3>
+                          <p className="mt-2 text-sm text-muted-foreground">{t.summary}</p>
+                        </div>
+                        <ArrowUpRight className="mt-8 size-4 text-sage transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                      </Link>
+                    </Reveal>
+                  ))}
               </div>
             </div>
           ))}

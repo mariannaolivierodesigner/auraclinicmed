@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminImpostazioniRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminLeadRouteImport } from './routes/_authenticated/admin.lead'
 import { Route as AuthenticatedAdminPazientiRouteImport } from './routes/_authenticated/admin.pazienti'
 import { Route as AuthenticatedAdminRisultatiRouteImport } from './routes/_authenticated/admin.risultati'
+import { Route as AuthenticatedAdminTrattamentiRouteImport } from './routes/_authenticated/admin.trattamenti'
 import { Route as AuthenticatedAdminTurniRouteImport } from './routes/_authenticated/admin.turni'
 import { Route as ApiPublicAppointmentSmsRouteImport } from './routes/api/public/appointment-sms'
 import { Route as TrattamentiCategoriaIndexRouteImport } from './routes/trattamenti.$categoria.index'
@@ -156,6 +157,12 @@ const AuthenticatedAdminRisultatiRoute =
     path: '/risultati',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTrattamentiRoute =
+  AuthenticatedAdminTrattamentiRouteImport.update({
+    id: '/trattamenti',
+    path: '/trattamenti',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminTurniRoute = AuthenticatedAdminTurniRouteImport.update({
   id: '/turni',
   path: '/turni',
@@ -201,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
+  '/admin/trattamenti': typeof AuthenticatedAdminTrattamentiRoute
   '/admin/turni': typeof AuthenticatedAdminTurniRoute
   '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
+  '/admin/trattamenti': typeof AuthenticatedAdminTrattamentiRoute
   '/admin/turni': typeof AuthenticatedAdminTurniRoute
   '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/_authenticated/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/_authenticated/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
+  '/_authenticated/admin/trattamenti': typeof AuthenticatedAdminTrattamentiRoute
   '/_authenticated/admin/turni': typeof AuthenticatedAdminTurniRoute
   '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/lead'
     | '/admin/pazienti'
     | '/admin/risultati'
+    | '/admin/trattamenti'
     | '/admin/turni'
     | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin/lead'
     | '/admin/pazienti'
     | '/admin/risultati'
+    | '/admin/trattamenti'
     | '/admin/turni'
     | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
@@ -344,6 +356,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/lead'
     | '/_authenticated/admin/pazienti'
     | '/_authenticated/admin/risultati'
+    | '/_authenticated/admin/trattamenti'
     | '/_authenticated/admin/turni'
     | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
@@ -534,6 +547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRisultatiRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/trattamenti': {
+      id: '/_authenticated/admin/trattamenti'
+      path: '/trattamenti'
+      fullPath: '/admin/trattamenti'
+      preLoaderRoute: typeof AuthenticatedAdminTrattamentiRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/turni': {
       id: '/_authenticated/admin/turni'
       path: '/turni'
@@ -573,6 +593,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminLeadRoute: typeof AuthenticatedAdminLeadRoute
   AuthenticatedAdminPazientiRoute: typeof AuthenticatedAdminPazientiRoute
   AuthenticatedAdminRisultatiRoute: typeof AuthenticatedAdminRisultatiRoute
+  AuthenticatedAdminTrattamentiRoute: typeof AuthenticatedAdminTrattamentiRoute
   AuthenticatedAdminTurniRoute: typeof AuthenticatedAdminTurniRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -585,6 +606,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminLeadRoute: AuthenticatedAdminLeadRoute,
   AuthenticatedAdminPazientiRoute: AuthenticatedAdminPazientiRoute,
   AuthenticatedAdminRisultatiRoute: AuthenticatedAdminRisultatiRoute,
+  AuthenticatedAdminTrattamentiRoute: AuthenticatedAdminTrattamentiRoute,
   AuthenticatedAdminTurniRoute: AuthenticatedAdminTurniRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
