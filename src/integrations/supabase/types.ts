@@ -351,6 +351,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          clinical_role: Database["public"]["Enums"]["clinical_role"] | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -358,6 +359,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          clinical_role?: Database["public"]["Enums"]["clinical_role"] | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -365,6 +367,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          clinical_role?: Database["public"]["Enums"]["clinical_role"] | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -488,6 +491,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "staff"
+      clinical_role: "medico" | "infermiera" | "assistente" | "segreteria" | "altro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -616,6 +620,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "staff"],
+      clinical_role: ["medico", "infermiera", "assistente", "segreteria", "altro"],
     },
   },
 } as const

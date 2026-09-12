@@ -13,11 +13,18 @@ export const Route = createFileRoute("/_authenticated/admin/turni")({
   component: TurniPage,
 });
 
+const CLINICAL_ROLE_LABELS: Record<string, string> = {
+  medico: "Medico",
+  infermiera: "Infermiera",
+  assistente: "Assistente",
+  segreteria: "Segreteria",
+  altro: "Altro",
+};
+
 const schema = z.object({
   staff_id: z.string().min(1, "Seleziona un membro dello staff"),
   starts_at: z.string().min(1, "Data e ora di inizio obbligatorie"),
   ends_at: z.string().min(1, "Data e ora di fine obbligatorie"),
-  role_label: z.string().max(60).optional(),
 });
 
 function TurniPage() {
@@ -25,13 +32,13 @@ function TurniPage() {
   const { data: me } = useStaff();
   const isAdmin = me?.roles.includes("admin") ?? false;
 
-  const [form, setForm] = useState({ staff_id: "", starts_at: "", ends_at: "", role_label: "" });
+  const [form, setForm] = useState({ staff_id: "", starts_at: "", ends_at: "" });
 
   const { data: team } = useQuery({
     queryKey: ["team-for-shifts"],
     queryFn: async () => {
       const [profiles, roles] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email").order("full_name"),
+        supabase.from("profiles").select("id, full_name, email, clinical_role").order("full_name"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (profiles.error) throw profiles.error;
@@ -39,6 +46,11 @@ function TurniPage() {
       return (profiles.data ?? []).filter((p) => staffIds.has(p.id));
     },
   });
+
+  const selectedStaff = (team ?? []).find((p) => p.id === form.staff_id);
+  const autoRoleLabel = selectedStaff?.clinical_role
+    ? (CLINICAL_ROLE_LABELS[selectedStaff.clinical_role] ?? selectedStaff.clinical_role)
+    : null;
 
   const { data: shifts } = useQuery({
     queryKey: ["staff-shifts"],
@@ -57,16 +69,20 @@ function TurniPage() {
       const parsed = schema.safeParse(form);
       if (!parsed.success) throw new Error(parsed.error.issues[0]!.message);
       const v = parsed.data;
+      const staff = (team ?? []).find((p) => p.id === v.staff_id);
+      const roleLabel = staff?.clinical_role
+        ? (CLINICAL_ROLE_LABELS[staff.clinical_role] ?? staff.clinical_role)
+        : null;
       const { error } = await supabase.from("staff_shifts").insert({
         staff_id: v.staff_id,
         starts_at: new Date(v.starts_at).toISOString(),
         ends_at: new Date(v.ends_at).toISOString(),
-        role_label: v.role_label || null,
+        role_label: roleLabel,
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      setForm({ staff_id: "", starts_at: "", ends_at: "", role_label: "" });
+      setForm({ staff_id: "", starts_at: "", ends_at: "" });
       qc.invalidateQueries({ queryKey: ["staff-shifts"] });
       toast.success("Turno creato");
     },
@@ -118,14 +134,10 @@ function TurniPage() {
             </select>
           </div>
           <div>
-            <Label>Ruolo turno (facoltativo)</Label>
-            <Input
-              className="mt-2 h-12 rounded-xl"
-              placeholder="Reception, sala, assistenza..."
-              maxLength={60}
-              value={form.role_label}
-              onChange={(e) => setForm({ ...form, role_label: e.target.value })}
-            />
+            <Label>Ruolo</Label>
+            <div className="mt-2 flex h-12 items-center rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground">
+              {autoRoleLabel ?? (form.staff_id ? "Nessun ruolo clinico impostato" : "Seleziona uno staff")}
+            </div>
           </div>
           <div>
             <Label>Inizio</Label>
