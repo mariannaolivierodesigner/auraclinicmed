@@ -6,6 +6,7 @@ import {
   FileSignature,
   LayoutDashboard,
   LogOut,
+  Palmtree,
   Sparkle,
   UserRound,
   Users,
@@ -25,6 +26,7 @@ const nav = [
   { to: "/admin/pazienti", label: "Pazienti", icon: Users, exact: false },
   { to: "/admin/agenda", label: "Agenda", icon: CalendarDays, exact: false },
   { to: "/admin/turni", label: "Turni", icon: CalendarClock, exact: false },
+  { to: "/admin/ferie", label: "Ferie e permessi", icon: Palmtree, exact: false },
   { to: "/admin/documenti", label: "Documenti", icon: FileSignature, exact: false },
   { to: "/admin/impostazioni", label: "Team", icon: UserRound, exact: false },
 ] as const;

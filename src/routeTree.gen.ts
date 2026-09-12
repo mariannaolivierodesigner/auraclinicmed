@@ -27,11 +27,13 @@ import { Route as TrattamentiIndexRouteImport } from './routes/trattamenti.index
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAgendaRouteImport } from './routes/_authenticated/admin.agenda'
 import { Route as AuthenticatedAdminDocumentiRouteImport } from './routes/_authenticated/admin.documenti'
+import { Route as AuthenticatedAdminFerieRouteImport } from './routes/_authenticated/admin.ferie'
 import { Route as AuthenticatedAdminImpostazioniRouteImport } from './routes/_authenticated/admin.impostazioni'
 import { Route as AuthenticatedAdminLeadRouteImport } from './routes/_authenticated/admin.lead'
 import { Route as AuthenticatedAdminPazientiRouteImport } from './routes/_authenticated/admin.pazienti'
 import { Route as AuthenticatedAdminRisultatiRouteImport } from './routes/_authenticated/admin.risultati'
 import { Route as AuthenticatedAdminTurniRouteImport } from './routes/_authenticated/admin.turni'
+import { Route as ApiPublicAppointmentSmsRouteImport } from './routes/api/public/appointment-sms'
 import { Route as TrattamentiCategoriaIndexRouteImport } from './routes/trattamenti.$categoria.index'
 import { Route as TrattamentiCategoriaSlugRouteImport } from './routes/trattamenti.$categoria.$slug'
 
@@ -126,6 +128,11 @@ const AuthenticatedAdminDocumentiRoute =
     path: '/documenti',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFerieRoute = AuthenticatedAdminFerieRouteImport.update({
+  id: '/ferie',
+  path: '/ferie',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminImpostazioniRoute =
   AuthenticatedAdminImpostazioniRouteImport.update({
     id: '/impostazioni',
@@ -153,6 +160,11 @@ const AuthenticatedAdminTurniRoute = AuthenticatedAdminTurniRouteImport.update({
   id: '/turni',
   path: '/turni',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const ApiPublicAppointmentSmsRoute = ApiPublicAppointmentSmsRouteImport.update({
+  id: '/api/public/appointment-sms',
+  path: '/api/public/appointment-sms',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TrattamentiCategoriaIndexRoute =
   TrattamentiCategoriaIndexRouteImport.update({
@@ -184,11 +196,13 @@ export interface FileRoutesByFullPath {
   '/trattamenti/': typeof TrattamentiIndexRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/admin/documenti': typeof AuthenticatedAdminDocumentiRoute
+  '/admin/ferie': typeof AuthenticatedAdminFerieRoute
   '/admin/impostazioni': typeof AuthenticatedAdminImpostazioniRoute
   '/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
   '/admin/turni': typeof AuthenticatedAdminTurniRoute
+  '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/trattamenti/$categoria/': typeof TrattamentiCategoriaIndexRoute
@@ -209,11 +223,13 @@ export interface FileRoutesByTo {
   '/trattamenti': typeof TrattamentiIndexRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/admin/documenti': typeof AuthenticatedAdminDocumentiRoute
+  '/admin/ferie': typeof AuthenticatedAdminFerieRoute
   '/admin/impostazioni': typeof AuthenticatedAdminImpostazioniRoute
   '/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
   '/admin/turni': typeof AuthenticatedAdminTurniRoute
+  '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/trattamenti/$categoria': typeof TrattamentiCategoriaIndexRoute
@@ -237,11 +253,13 @@ export interface FileRoutesById {
   '/trattamenti/': typeof TrattamentiIndexRoute
   '/_authenticated/admin/agenda': typeof AuthenticatedAdminAgendaRoute
   '/_authenticated/admin/documenti': typeof AuthenticatedAdminDocumentiRoute
+  '/_authenticated/admin/ferie': typeof AuthenticatedAdminFerieRoute
   '/_authenticated/admin/impostazioni': typeof AuthenticatedAdminImpostazioniRoute
   '/_authenticated/admin/lead': typeof AuthenticatedAdminLeadRoute
   '/_authenticated/admin/pazienti': typeof AuthenticatedAdminPazientiRoute
   '/_authenticated/admin/risultati': typeof AuthenticatedAdminRisultatiRoute
   '/_authenticated/admin/turni': typeof AuthenticatedAdminTurniRoute
+  '/api/public/appointment-sms': typeof ApiPublicAppointmentSmsRoute
   '/trattamenti/$categoria/$slug': typeof TrattamentiCategoriaSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/trattamenti/$categoria/': typeof TrattamentiCategoriaIndexRoute
@@ -265,11 +283,13 @@ export interface FileRouteTypes {
     | '/trattamenti/'
     | '/admin/agenda'
     | '/admin/documenti'
+    | '/admin/ferie'
     | '/admin/impostazioni'
     | '/admin/lead'
     | '/admin/pazienti'
     | '/admin/risultati'
     | '/admin/turni'
+    | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
     | '/admin/'
     | '/trattamenti/$categoria/'
@@ -290,11 +310,13 @@ export interface FileRouteTypes {
     | '/trattamenti'
     | '/admin/agenda'
     | '/admin/documenti'
+    | '/admin/ferie'
     | '/admin/impostazioni'
     | '/admin/lead'
     | '/admin/pazienti'
     | '/admin/risultati'
     | '/admin/turni'
+    | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
     | '/admin'
     | '/trattamenti/$categoria'
@@ -317,11 +339,13 @@ export interface FileRouteTypes {
     | '/trattamenti/'
     | '/_authenticated/admin/agenda'
     | '/_authenticated/admin/documenti'
+    | '/_authenticated/admin/ferie'
     | '/_authenticated/admin/impostazioni'
     | '/_authenticated/admin/lead'
     | '/_authenticated/admin/pazienti'
     | '/_authenticated/admin/risultati'
     | '/_authenticated/admin/turni'
+    | '/api/public/appointment-sms'
     | '/trattamenti/$categoria/$slug'
     | '/_authenticated/admin/'
     | '/trattamenti/$categoria/'
@@ -342,6 +366,7 @@ export interface RootRouteChildren {
   LegalePrivacyRoute: typeof LegalePrivacyRoute
   LegaleTerminiRoute: typeof LegaleTerminiRoute
   TrattamentiIndexRoute: typeof TrattamentiIndexRoute
+  ApiPublicAppointmentSmsRoute: typeof ApiPublicAppointmentSmsRoute
   TrattamentiCategoriaSlugRoute: typeof TrattamentiCategoriaSlugRoute
   TrattamentiCategoriaIndexRoute: typeof TrattamentiCategoriaIndexRoute
 }
@@ -474,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentiRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ferie': {
+      id: '/_authenticated/admin/ferie'
+      path: '/ferie'
+      fullPath: '/admin/ferie'
+      preLoaderRoute: typeof AuthenticatedAdminFerieRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/impostazioni': {
       id: '/_authenticated/admin/impostazioni'
       path: '/impostazioni'
@@ -509,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTurniRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/appointment-sms': {
+      id: '/api/public/appointment-sms'
+      path: '/api/public/appointment-sms'
+      fullPath: '/api/public/appointment-sms'
+      preLoaderRoute: typeof ApiPublicAppointmentSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trattamenti/$categoria/': {
       id: '/trattamenti/$categoria/'
       path: '/trattamenti/$categoria'
@@ -529,6 +568,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAgendaRoute: typeof AuthenticatedAdminAgendaRoute
   AuthenticatedAdminDocumentiRoute: typeof AuthenticatedAdminDocumentiRoute
+  AuthenticatedAdminFerieRoute: typeof AuthenticatedAdminFerieRoute
   AuthenticatedAdminImpostazioniRoute: typeof AuthenticatedAdminImpostazioniRoute
   AuthenticatedAdminLeadRoute: typeof AuthenticatedAdminLeadRoute
   AuthenticatedAdminPazientiRoute: typeof AuthenticatedAdminPazientiRoute
@@ -540,6 +580,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAgendaRoute: AuthenticatedAdminAgendaRoute,
   AuthenticatedAdminDocumentiRoute: AuthenticatedAdminDocumentiRoute,
+  AuthenticatedAdminFerieRoute: AuthenticatedAdminFerieRoute,
   AuthenticatedAdminImpostazioniRoute: AuthenticatedAdminImpostazioniRoute,
   AuthenticatedAdminLeadRoute: AuthenticatedAdminLeadRoute,
   AuthenticatedAdminPazientiRoute: AuthenticatedAdminPazientiRoute,
@@ -577,6 +618,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalePrivacyRoute: LegalePrivacyRoute,
   LegaleTerminiRoute: LegaleTerminiRoute,
   TrattamentiIndexRoute: TrattamentiIndexRoute,
+  ApiPublicAppointmentSmsRoute: ApiPublicAppointmentSmsRoute,
   TrattamentiCategoriaSlugRoute: TrattamentiCategoriaSlugRoute,
   TrattamentiCategoriaIndexRoute: TrattamentiCategoriaIndexRoute,
 }

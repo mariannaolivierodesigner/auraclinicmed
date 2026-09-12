@@ -417,6 +417,48 @@ export type Database = {
           },
         ]
       }
+      staff_absences: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          end_time: string | null
+          id: string
+          reason: string | null
+          staff_id: string
+          start_date: string
+          start_time: string | null
+          type: Database["public"]["Enums"]["absence_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          staff_id: string
+          start_date: string
+          start_time?: string | null
+          type: Database["public"]["Enums"]["absence_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          staff_id?: string
+          start_date?: string
+          start_time?: string | null
+          type?: Database["public"]["Enums"]["absence_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       staff_shifts: {
         Row: {
           created_at: string
@@ -490,6 +532,7 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      absence_type: "ferie" | "malattia" | "permesso"
       app_role: "admin" | "staff"
       clinical_role: "medico" | "infermiera" | "assistente" | "segreteria" | "altro"
     }
@@ -619,6 +662,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      absence_type: ["ferie", "malattia", "permesso"],
       app_role: ["admin", "staff"],
       clinical_role: ["medico", "infermiera", "assistente", "segreteria", "altro"],
     },
