@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type SmsKind = "reminder" | "confirmation";
+type SmsChannel = "sms" | "whatsapp";
 
 const searchSchema = z.object({
   patient_id: z.string().optional(),
@@ -108,16 +109,27 @@ function AgendaPage() {
   });
 
   const sendSms = useMutation({
-    mutationFn: async ({ appointmentId, kind }: { appointmentId: string; kind: SmsKind }) => {
-      return sendAppointmentSms({ data: { appointment_id: appointmentId, kind } });
+    mutationFn: async ({
+      appointmentId,
+      kind,
+      channel,
+    }: {
+      appointmentId: string;
+      kind: SmsKind;
+      channel: SmsChannel;
+    }) => {
+      return sendAppointmentSms({ data: { appointment_id: appointmentId, kind, channel } });
     },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["appointments"] });
+      const channelLabel = variables.channel === "whatsapp" ? "WhatsApp" : "SMS";
       toast.success(
-        variables.kind === "reminder" ? "Promemoria SMS inviato" : "Conferma SMS inviata",
+        variables.kind === "reminder"
+          ? `Promemoria ${channelLabel} inviato`
+          : `Conferma ${channelLabel} inviata`,
       );
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Invio SMS non riuscito"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Invio non riuscito"),
   });
 
   const groups = new Map<string, typeof appointments>();
@@ -234,22 +246,58 @@ function AgendaPage() {
                     </span>
                     {a.patients?.phone && (
                       <>
-                        <button
-                          className="text-xs text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
-                          disabled={sendSms.isPending}
-                          onClick={() =>
-                            sendSms.mutate({ appointmentId: a.id, kind: "confirmation" })
-                          }
-                        >
-                          Invia conferma SMS
-                        </button>
-                        <button
-                          className="text-xs text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
-                          disabled={sendSms.isPending}
-                          onClick={() => sendSms.mutate({ appointmentId: a.id, kind: "reminder" })}
-                        >
-                          Invia promemoria SMS
-                        </button>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <span>Conferma:</span>
+                          <button
+                            className="underline-offset-4 hover:underline disabled:opacity-50"
+                            disabled={sendSms.isPending}
+                            onClick={() =>
+                              sendSms.mutate({ appointmentId: a.id, kind: "confirmation", channel: "sms" })
+                            }
+                          >
+                            SMS
+                          </button>
+                          <span>·</span>
+                          <button
+                            className="underline-offset-4 hover:underline disabled:opacity-50"
+                            disabled={sendSms.isPending}
+                            onClick={() =>
+                              sendSms.mutate({
+                                appointmentId: a.id,
+                                kind: "confirmation",
+                                channel: "whatsapp",
+                              })
+                            }
+                          >
+                            WhatsApp
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <span>Promemoria:</span>
+                          <button
+                            className="underline-offset-4 hover:underline disabled:opacity-50"
+                            disabled={sendSms.isPending}
+                            onClick={() =>
+                              sendSms.mutate({ appointmentId: a.id, kind: "reminder", channel: "sms" })
+                            }
+                          >
+                            SMS
+                          </button>
+                          <span>·</span>
+                          <button
+                            className="underline-offset-4 hover:underline disabled:opacity-50"
+                            disabled={sendSms.isPending}
+                            onClick={() =>
+                              sendSms.mutate({
+                                appointmentId: a.id,
+                                kind: "reminder",
+                                channel: "whatsapp",
+                              })
+                            }
+                          >
+                            WhatsApp
+                          </button>
+                        </div>
                       </>
                     )}
                     <button

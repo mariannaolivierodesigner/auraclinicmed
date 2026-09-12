@@ -379,6 +379,7 @@ export type Database = {
       sms_log: {
         Row: {
           appointment_id: string | null
+          channel: string
           created_at: string
           id: string
           kind: string
@@ -389,6 +390,7 @@ export type Database = {
         }
         Insert: {
           appointment_id?: string | null
+          channel?: string
           created_at?: string
           id?: string
           kind: string
@@ -399,6 +401,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string | null
+          channel?: string
           created_at?: string
           id?: string
           kind?: string

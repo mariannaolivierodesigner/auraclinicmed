@@ -17,16 +17,9 @@ export const Route = createFileRoute("/_authenticated/admin/risultati")({
   component: GalleryAdminPage,
 });
 
-const categories = [
-  { slug: "viso", label: "Viso" },
-  { slug: "seno", label: "Seno" },
-  { slug: "corpo", label: "Corpo" },
-  { slug: "medicina-estetica", label: "Medicina estetica" },
-];
-
 const empty = {
-  title: "",
-  category: "viso",
+  category_id: "",
+  treatment_id: "",
   meta: "",
   description: "",
   consent: false,
@@ -42,6 +35,34 @@ function GalleryAdminPage() {
   const [form, setForm] = useState(empty);
   const [before, setBefore] = useState<File | null>(null);
   const [after, setAfter] = useState<File | null>(null);
+
+  const { data: categories } = useQuery({
+    queryKey: ["admin-treatment-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("treatment_categories")
+        .select("id, name, slug")
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: treatments } = useQuery({
+    queryKey: ["admin-treatments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("treatments")
+        .select("id, category_id, name")
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const treatmentsInCategory = (treatments ?? []).filter((t) => t.category_id === form.category_id);
+  const selectedTreatment = (treatments ?? []).find((t) => t.id === form.treatment_id);
+  const selectedCategory = (categories ?? []).find((c) => c.id === form.category_id);
 
   const { data: cases } = useQuery({
     queryKey: ["case_photos"],
@@ -74,7 +95,8 @@ function GalleryAdminPage() {
 
   const create = useMutation({
     mutationFn: async () => {
-      if (!form.title.trim()) throw new Error("Titolo obbligatorio");
+      if (!form.category_id) throw new Error("Seleziona una categoria");
+      if (!selectedTreatment) throw new Error("Seleziona un trattamento");
       if (!before || !after) throw new Error("Carica sia la foto prima sia quella dopo");
       if (!form.consent) throw new Error("Serve il consenso alla pubblicazione delle immagini");
       if (!form.consent_signer.trim()) throw new Error("Indica chi ha firmato il consenso");
@@ -101,8 +123,8 @@ function GalleryAdminPage() {
       const a = await upload(after, "after");
 
       const { error } = await supabase.from("case_photos").insert({
-        title: form.title.trim(),
-        category: form.category,
+        title: selectedTreatment.name,
+        category: selectedCategory?.slug ?? "",
         meta: form.meta.trim() || null,
         description: form.description.trim() || null,
         before_path: b.raw,
@@ -181,26 +203,42 @@ function GalleryAdminPage() {
         <h2 className="text-base font-semibold">Nuovo caso</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div>
-            <Label>Titolo</Label>
-            <Input
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Rinoplastica strutturata"
-            />
-          </div>
-          <div>
             <Label>Categoria</Label>
             <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value, treatment_id: "" })}
               className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
             >
-              {categories.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.label}
+              <option value="">Seleziona...</option>
+              {(categories ?? []).map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <Label>Trattamento</Label>
+            <select
+              value={form.treatment_id}
+              onChange={(e) => setForm({ ...form, treatment_id: e.target.value })}
+              disabled={!form.category_id}
+              className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
+            >
+              <option value="">
+                {form.category_id ? "Seleziona..." : "Scegli prima una categoria"}
+              </option>
+              {treatmentsInCategory.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+            {form.category_id && treatmentsInCategory.length === 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Nessun trattamento in questa categoria: aggiungilo prima dalla scheda "Trattamenti".
+              </p>
+            )}
           </div>
           <div>
             <Label>Dettagli (età, tempo dall'intervento)</Label>

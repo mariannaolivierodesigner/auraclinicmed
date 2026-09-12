@@ -2,17 +2,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-// Invio SMS reale (Twilio) di "promemoria" o "conferma" per un appuntamento.
+// Invio SMS o WhatsApp reale (Twilio) di "promemoria" o "conferma" per un appuntamento.
 //
 // Richiede queste variabili d'ambiente configurate su Vercel (Project Settings → Environment
 // Variables), esattamente come SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY sono già disponibili:
-//   TWILIO_ACCOUNT_SID   -> Account SID Twilio
-//   TWILIO_AUTH_TOKEN    -> Auth Token Twilio
-//   TWILIO_FROM_NUMBER   -> numero mittente Twilio in formato E.164 (es. +390212345678)
+//   TWILIO_ACCOUNT_SID        -> Account SID Twilio
+//   TWILIO_AUTH_TOKEN         -> Auth Token Twilio
+//   TWILIO_FROM_NUMBER        -> numero mittente Twilio per SMS, formato E.164 (es. +390212345678)
+//   TWILIO_WHATSAPP_FROM_NUMBER -> numero mittente Twilio abilitato per WhatsApp, formato E.164
+//                                  (in fase demo è il numero del sandbox WhatsApp di Twilio;
+//                                  per un cliente reale serve un mittente WhatsApp Business approvato)
 
 const inputSchema = z.object({
   appointment_id: z.string().uuid(),
   kind: z.enum(["reminder", "confirmation"]),
+  channel: z.enum(["sms", "whatsapp"]).default("sms"),
 });
 
 function buildMessage(
@@ -46,10 +50,19 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
     const TWILIO_ACCOUNT_SID = process.env["TWILIO_ACCOUNT_SID"];
     const TWILIO_AUTH_TOKEN = process.env["TWILIO_AUTH_TOKEN"];
     const TWILIO_FROM_NUMBER = process.env["TWILIO_FROM_NUMBER"];
+    const TWILIO_WHATSAPP_FROM_NUMBER = process.env["TWILIO_WHATSAPP_FROM_NUMBER"];
 
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
       throw new Error(
-        "SMS non configurato: mancano le variabili TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER su Vercel.",
+        "Messaggi non configurati: mancano le variabili TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN su Vercel.",
+      );
+    }
+    if (data.channel === "sms" && !TWILIO_FROM_NUMBER) {
+      throw new Error("SMS non configurato: manca la variabile TWILIO_FROM_NUMBER su Vercel.");
+    }
+    if (data.channel === "whatsapp" && !TWILIO_WHATSAPP_FROM_NUMBER) {
+      throw new Error(
+        "WhatsApp non configurato: manca la variabile TWILIO_WHATSAPP_FROM_NUMBER su Vercel.",
       );
     }
 
@@ -74,6 +87,10 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
 
     const body = buildMessage(data.kind, patient.first_name, appt.title, appt.starts_at);
 
+    const isWhatsapp = data.channel === "whatsapp";
+    const from = isWhatsapp ? `whatsapp:${TWILIO_WHATSAPP_FROM_NUMBER}` : TWILIO_FROM_NUMBER!;
+    const to = isWhatsapp ? `whatsapp:${patient.phone}` : patient.phone;
+
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
     const twilioRes = await fetch(twilioUrl, {
       method: "POST",
@@ -81,7 +98,7 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
         Authorization: `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({ To: patient.phone, From: TWILIO_FROM_NUMBER, Body: body }),
+      body: new URLSearchParams({ To: to, From: from, Body: body }),
     });
 
     const twilioJson = (await twilioRes.json()) as unknown;
@@ -90,6 +107,7 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
     await supabaseAdmin.from("sms_log").insert({
       appointment_id: data.appointment_id,
       kind: data.kind,
+      channel: data.channel,
       phone: patient.phone,
       status: success ? "inviato" : "errore",
       provider_response: JSON.stringify(twilioJson).slice(0, 2000),
@@ -97,7 +115,9 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
     });
 
     if (!success) {
-      throw new Error("Invio SMS non riuscito: Twilio ha rifiutato la richiesta.");
+      throw new Error(
+        `Invio ${isWhatsapp ? "WhatsApp" : "SMS"} non riuscito: Twilio ha rifiutato la richiesta.`,
+      );
     }
 
     const column = data.kind === "reminder" ? "reminder_sent_at" : "confirmation_sent_at";
