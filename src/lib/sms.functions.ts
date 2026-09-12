@@ -4,8 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Invio SMS reale (Twilio) di "promemoria" o "conferma" per un appuntamento.
 //
-// Richiede questi secrets configurati su Lovable Cloud (Cloud → Secrets), esattamente
-// come SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY sono già disponibili automaticamente:
+// Richiede queste variabili d'ambiente configurate su Vercel (Project Settings → Environment
+// Variables), esattamente come SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY sono già disponibili:
 //   TWILIO_ACCOUNT_SID   -> Account SID Twilio
 //   TWILIO_AUTH_TOKEN    -> Auth Token Twilio
 //   TWILIO_FROM_NUMBER   -> numero mittente Twilio in formato E.164 (es. +390212345678)
@@ -49,7 +49,7 @@ export const sendAppointmentSms = createServerFn({ method: "POST" })
 
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
       throw new Error(
-        "SMS non configurato: mancano i secrets TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER su Lovable Cloud.",
+        "SMS non configurato: mancano le variabili TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER su Vercel.",
       );
     }
 
